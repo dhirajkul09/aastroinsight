@@ -1,0 +1,33 @@
+{
+  "name": "Astro's Insight — वैदिक ज्योतिष",
+  "short_name": "AstroInsight",
+  "description": "वैदिक ज्योतिष परामर्श — जन्म कुंडली, राशिफल, मुफ्त परामर्श",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#7B1C2E",
+  "theme_color": "#7B1C2E",
+  "orientation": "portrait-primary",
+  "lang": "hi",
+  "categories": ["lifestyle", "education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "कुंडली बनाएं",
+      "short_name": "कुंडली",
+      "description": "अपनी जन्म कुंडली बनाएं",
+      "url": "/#kundli",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "मुफ्त परामर्श",
+      "short_name": "परामर्श",
+      "description": "ज्योतिषाचार्य से मुफ्त सलाह",
+      "url": "/#consult",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
