@@ -1109,7 +1109,7 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
   <div class="modal-box wide">
     <button class="modal-close" onclick="closeRashifal()">✕</button>
     <h3>♈ राशिफल — AI द्वारा</h3>
-    <p class="modal-sub">अपनी राशि चुनें — Claude AI आपके लिए विस्तृत फलादेश देगा</p>
+    <p class="modal-sub">अपनी राशि चुनें — विस्तृत फलादेश प्राप्त करें</p>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-bottom:1rem">
       <button class="rashi-btn" onclick="selectRashi(0,'मेष','♈')">♈ मेष</button>
@@ -1152,8 +1152,7 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
 
     <div style="background:#FFF8F0;border-radius:10px;padding:1rem;margin-bottom:1rem;border:1px solid var(--bd)">
       <div style="font-size:.9rem;color:var(--tx);margin-bottom:.5rem"><b>📱 WhatsApp:</b> +91-7008310206</div>
-      <div style="font-size:.9rem;color:var(--tx);margin-bottom:.5rem"><b>📧 Email:</b> aastroinsight@gmail.com</div>
-      <div style="font-size:.9rem;color:var(--tx)"><b>⏰ समय:</b> प्रातः 9 बजे — सायं 8 बजे</div>
+      <div style="font-size:.9rem;color:var(--tx)"><b>📧 Email:</b> aastroinsight@gmail.com</div>
     </div>
 
     <div class="fl"><label>आपका नाम *</label><input id="sp-name" type="text" placeholder="पूरा नाम लिखें"></div>
@@ -4944,17 +4943,32 @@ async function fetchRashifal(name, symbol){
   var today = new Date().toLocaleDateString('hi-IN', {day:'numeric', month:'long', year:'numeric'});
   var prompt = 'आप एक अनुभवी वैदिक ज्योतिषी हैं। आज की तारीख ' + today + ' है।\n\n' +
     name + ' राशि के जातकों के लिए ' + periodText + ' राशिफल विस्तार से लिखें।\n\n' +
-    'निम्न बिंदुओं पर विस्तार से लिखें:\n' +
+    'निम्न बिंदुओं पर लिखें:\n' +
     '1. समग्र फल\n2. स्वास्थ्य\n3. करियर व व्यापार\n4. प्रेम व परिवार\n5. धन व आर्थिक स्थिति\n6. शुभ रंग, अंक व दिन\n7. उपाय\n\n' +
-    'भाषा: सरल, प्रवाहमयी हिंदी। realistic aur balanced predictions den — kuch challenges bhi hon.';
+    'सरल, प्रवाहमयी हिंदी में लिखें। संतुलित फलादेश दें।';
 
-  var result = await callClaudeJSON(prompt, 'Aap ek anubhavi Vedic jyotishi hain. Hamesha shuddh Hindi mein vistar se uttar den.', 1500);
-
-  document.getElementById('rashifal-dots').style.display = 'none';
-  document.getElementById('rashifal-text').style.display = 'block';
-  document.getElementById('rashifal-text').innerHTML = result
-    ? result.replace(/\n/g,'<br>').replace(/(\d+\.\s)/g,'<b>$1</b>')
-    : 'राशिफल लोड करने में समस्या हुई — कृपया पुनः प्रयास करें।';
+  try {
+    var res = await fetch('/functions/claude', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        max_tokens: 1500,
+        system: 'Aap ek anubhavi Vedic jyotishi hain. Hamesha shuddh Hindi mein vistar se uttar den.',
+        messages: [{role:'user', content: prompt}]
+      })
+    });
+    var data = await res.json();
+    var result = (data.content && data.content[0] && data.content[0].text) || '';
+    document.getElementById('rashifal-dots').style.display = 'none';
+    document.getElementById('rashifal-text').style.display = 'block';
+    document.getElementById('rashifal-text').innerHTML = result
+      ? result.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/(\d+\.\s[\u0900-\u097F\w]+)/g,'<b>$1</b>')
+      : 'राशिफल लोड करने में समस्या हुई — कृपया पुनः प्रयास करें।';
+  } catch(e) {
+    document.getElementById('rashifal-dots').style.display = 'none';
+    document.getElementById('rashifal-text').style.display = 'block';
+    document.getElementById('rashifal-text').textContent = 'राशिफल लोड करने में समस्या हुई — कृपया पुनः प्रयास करें।';
+  }
 }
 
 // ── Sampark / WhatsApp ──
