@@ -799,6 +799,9 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
           <!-- Status bar shown when question is sent / session state -->
           <div id="cm-status-bar" style="display:none;margin-top:.6rem;padding:.65rem .9rem;border-radius:8px;font-size:.83rem;text-align:center"></div>
 
+          <!-- Dedicated WA notification container — always in DOM -->
+          <div id="wa-toast-container" style="margin-top:.4rem"></div>
+
           <!-- Request more questions button (shown in replied state) -->
           <div id="cm-request-area" style="display:none;margin-top:.5rem;text-align:center">
             <button class="btn bs2" style="width:100%;padding:.55rem;font-size:.83rem" onclick="custRequestMoreQuestions()">
@@ -3981,23 +3984,51 @@ function custSendMsg(){
 }
 
 function showWaToast(waUrl, label){
+  // Remove any existing toast
   var existing = document.getElementById('wa-sent-toast');
   if(existing) existing.remove();
+
   var toast = document.createElement('div');
   toast.id = 'wa-sent-toast';
-  toast.style.cssText = 'background:#E8F5E9;border:1.5px solid #27AE60;border-radius:8px;padding:.6rem .85rem;font-size:.8rem;color:#1B5E20;margin-top:.6rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap';
+  toast.style.cssText = [
+    'background:#E8F5E9',
+    'border:1.5px solid #27AE60',
+    'border-radius:10px',
+    'padding:.75rem 1rem',
+    'font-size:.82rem',
+    'color:#1B5E20',
+    'display:flex',
+    'align-items:center',
+    'gap:.6rem',
+    'flex-wrap:wrap',
+    'box-shadow:0 2px 12px rgba(39,174,96,.2)',
+    'animation:slideUp .3s ease'
+  ].join(';');
+
   toast.innerHTML =
-    '<span>' + (label||'✅ ज्योतिषाचार्य को सूचित करें:') + '</span>' +
+    '<span style="flex:1;min-width:120px;font-weight:600">' +
+      (label || '✅ ज्योतिषाचार्य को सूचित करें:') +
+    '</span>' +
     '<a href="' + waUrl + '" target="_blank" rel="noopener" ' +
-    'style="display:inline-flex;align-items:center;gap:.35rem;background:#25D366;color:#fff;border-radius:6px;padding:.35rem .75rem;font-weight:700;text-decoration:none;font-size:.8rem;flex-shrink:0">' +
-    '<svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.526 5.845L.057 23.492a.5.5 0 0 0 .614.614l5.647-1.469A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.686-.523-5.21-1.43l-.374-.222-3.882 1.01 1.01-3.882-.222-.374A10 10 0 1 1 12 22z"/></svg>' +
-    ' WhatsApp भेजें</a>';
-  // Insert below status-bar (always visible after compose hides)
-  var anchor = document.getElementById('cm-status-bar') ||
-               document.getElementById('cm-request-area') ||
-               document.querySelector('#cm-pane-chat .chat-wrap');
-  if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(toast, anchor.nextSibling);
-  setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 30000);
+    'style="display:inline-flex;align-items:center;gap:.4rem;background:#25D366;' +
+    'color:#fff;border-radius:8px;padding:.45rem .9rem;font-weight:700;' +
+    'text-decoration:none;font-size:.82rem;flex-shrink:0;white-space:nowrap">' +
+    '<svg viewBox="0 0 24 24" width="15" height="15" fill="white">' +
+    '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>' +
+    '<path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.526 5.845L.057 23.492a.5.5 0 0 0 .614.614l5.647-1.469A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.686-.523-5.21-1.43l-.374-.222-3.882 1.01 1.01-3.882-.222-.374A10 10 0 1 1 12 22z"/>' +
+    '</svg> WhatsApp भेजें</a>' +
+    '<button onclick="this.parentNode.remove()" style="background:none;border:none;' +
+    'color:#27AE60;cursor:pointer;font-size:1rem;padding:0 .2rem;flex-shrink:0">✕</button>';
+
+  // Insert into dedicated container — always visible
+  var container = document.getElementById('wa-toast-container');
+  if(container){
+    container.innerHTML = ''; // clear old
+    container.appendChild(toast);
+  }
+
+  // Auto-remove after 45 seconds
+  setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 45000);
 }
 function custLogout(){
   if(custUnsub){ custUnsub(); custUnsub=null; }
