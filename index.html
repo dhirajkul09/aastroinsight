@@ -3725,6 +3725,8 @@ function astroSendPdf(){
     alert('PDF भेजने में त्रुटि: ' + e.message);
   });
 }
+
+function showTab(t) {
   document.querySelectorAll('.tp').forEach(function(p)  { p.classList.remove('active'); });
   document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('active'); });
   var panel = document.getElementById('panel-' + t);
@@ -4918,7 +4920,8 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').then(function(reg){
       console.log('SW registered:', reg.scope);
     }).catch(function(err){
-      console.log('SW registration failed:', err);
+      // sw.js not found (local file or not uploaded) — ignore silently
+      console.log('SW not available:', err.message);
     });
   });
 }
