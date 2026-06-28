@@ -1327,14 +1327,15 @@ var FIREBASE_CONFIG = {
 var fbReady = false, db = null, fbAuth = null;
 try {
   if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('YOUR_') !== 0) {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.firestore();
-    fbAuth = firebase.auth();
-    // iOS Safari / local file: use SESSION persistence to avoid IndexedDB errors
-    fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(){});
-    fbReady = true;
+    if(typeof firebase !== 'undefined') {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+      fbAuth = firebase.auth();
+      fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(){});
+      fbReady = true;
+    }
   }
-} catch (e) { console.error('Firebase init failed:', e); fbReady = false; }
+} catch (e) { console.warn('Firebase init skipped:', e.message); fbReady = false; }
 </script>
 
 <script>
