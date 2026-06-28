@@ -114,9 +114,9 @@ select option{background:#fff;color:var(--ik)}
 @keyframes ctaPulse{0%,100%{box-shadow:0 2px 8px var(--sh)}50%{box-shadow:0 4px 14px rgba(212,60,60,.28)}}
 .modal-ovl{display:none;position:fixed;inset:0;background:rgba(45,20,8,.55);z-index:1000;align-items:center;justify-content:center;padding:1rem}
 .modal-ovl.show{display:flex}
-.modal-box{background:var(--cd);border-radius:14px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;padding:1.6rem;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.3)}
-.modal-box.wide{max-width:760px}
-.modal-box.wide{max-width:780px}
+.modal-box{background:var(--cd);border-radius:14px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;padding:1.6rem;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.modal-box.wide{max-width:900px}
+.modal-box.wide{max-width:900px}
 .modal-close{position:absolute;top:.7rem;right:.8rem;background:none;border:none;font-size:1.4rem;color:var(--mt);cursor:pointer;line-height:1;padding:.2rem .5rem}
 .modal-close:hover{color:var(--mr)}
 .modal-box h3{color:var(--mr);margin-bottom:.3rem}
@@ -236,6 +236,11 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
 
 .mob-muft-wrap{display:none}
 @media(max-width:899px){.mob-muft-wrap{display:block;padding:0 .5rem .3rem}}
+/* ── PDF Upload Panel (Astrologer) ── */
+.pdf-upload-panel{border:2px dashed var(--bd);border-radius:10px;padding:.8rem;text-align:center;cursor:pointer;transition:border-color .2s;background:#FFFAF4}
+.pdf-upload-panel:hover{border-color:var(--sf);background:#FFF5E8}
+.pdf-upload-panel input[type=file]{display:none}
+.pdf-preview{background:#F0FFF4;border:1px solid #27AE60;border-radius:8px;padding:.6rem .8rem;font-size:.8rem;color:#1B5E20;margin-top:.5rem;display:flex;align-items:center;gap:.5rem}
 /* ── PWA Install Prompt ── */
 #pwa-install-bar{
   position:fixed;bottom:0;left:0;right:0;z-index:99999;
@@ -788,21 +793,32 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
       <p class="modal-sub" id="cm-inbox-sub"></p>
 
       <div style="display:flex;gap:.5rem;margin-bottom:.8rem">
-        <button class="btn bs2" id="cmt-chat" onclick="showCmInboxTab('chat')" style="flex:1;padding:.55rem">&#x1F4AC; प्रश्न</button>
         <button class="btn bs2" id="cmt-birth" onclick="showCmInboxTab('birth')" style="flex:1;padding:.55rem">&#x1F52E; जन्म विवरण</button>
+        <button class="btn bs2" id="cmt-chat" onclick="showCmInboxTab('chat')" style="flex:1;padding:.55rem">&#x1F4AC; प्रश्न / कुंडली</button>
+      </div>
+
+      <div id="cm-pane-birth" style="display:none">
+        <p class="modal-sub" style="margin-bottom:.8rem">अपना जन्म विवरण यहां सहेजें — ज्योतिषी आपकी कुंडली बनाकर बेहतर परामर्श दे सकेंगे।</p>
+        <div class="fl"><label>नाम</label><input id="cmb-name" type="text" placeholder="आपका नाम"></div>
+        <div class="fl" style="margin-top:.6rem"><label>जन्म तिथि</label><input id="cmb-dob" type="date"></div>
+        <div class="fl" style="margin-top:.6rem"><label>जन्म समय</label><input id="cmb-tob" type="time"></div>
+        <div class="fl" style="margin-top:.6rem"><label>जन्म स्थान</label><input id="cmb-place" type="text" placeholder="शहर का नाम लिखें (e.g. Bhiwani, Delhi)" autocomplete="off"></div>
+        <div class="modal-err" id="cmb-err"></div>
+        <div class="modal-sub" id="cmb-saved-msg" style="color:#1B7A3D;display:none">&#x2713; जन्म विवरण सहेजा गया।</div>
+        <button class="btn bp" style="width:100%;margin-top:.7rem" onclick="custSaveBirthDetails()">सहेजें</button>
       </div>
 
       <div id="cm-pane-chat">
         <div class="chat-wrap">
           <div class="chat-msgs" id="cm-msgs"></div>
 
-          <!-- Status bar shown when question is sent / session state -->
+          <!-- Status bar -->
           <div id="cm-status-bar" style="display:none;margin-top:.6rem;padding:.65rem .9rem;border-radius:8px;font-size:.83rem;text-align:center"></div>
 
           <!-- Dedicated WA notification container — always in DOM -->
           <div id="wa-toast-container" style="margin-top:.4rem"></div>
 
-          <!-- Request more questions button (shown in replied state) -->
+          <!-- Request more questions button -->
           <div id="cm-request-area" style="display:none;margin-top:.5rem;text-align:center">
             <button class="btn bs2" style="width:100%;padding:.55rem;font-size:.83rem" onclick="custRequestMoreQuestions()">
               🙏 अगला प्रश्न पूछने की अनुमति मांगें
@@ -810,14 +826,16 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
             <div id="cm-request-status" style="font-size:.78rem;color:var(--mt);margin-top:.35rem"></div>
           </div>
 
-          <!-- Compose — only shown when allowed -->
-          <div class="chat-compose" id="cm-compose-area">
-            <textarea id="cm-newmsg" placeholder="अपना प्रश्न यहाँ लिखें... (एक प्रश्न)" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();custSendMsg();}"></textarea>
-            <button class="btn bp" style="flex:0 0 auto" onclick="custSendMsg()">भेजें &#x27A4;</button>
+          <!-- Free text compose — no label restrictions, plain textarea -->
+          <div class="chat-compose" id="cm-compose-area" style="margin-top:.6rem">
+            <textarea id="cm-newmsg" placeholder="यहाँ अपना प्रश्न या कुंडली संबंधी जानकारी लिखें..." rows="3"
+              style="min-height:80px;resize:vertical"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();custSendMsg();}"></textarea>
+            <button class="btn bp" style="flex:0 0 auto;align-self:flex-end" onclick="custSendMsg()">भेजें &#x27A4;</button>
           </div>
         </div>
 
-        <!-- Paid options — always visible in inbox -->
+        <!-- Paid options -->
         <div style="margin-top:.8rem;border-top:1px dashed var(--bd);padding-top:.7rem">
           <p style="font-size:.75rem;color:var(--mt);text-align:center;margin-bottom:.5rem">⚡ तुरंत जवाब चाहिए? प्रीमियम सेवाएं:</p>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap">
@@ -831,17 +849,6 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
             </a>
           </div>
         </div>
-      </div>
-
-      <div id="cm-pane-birth" style="display:none">
-        <p class="modal-sub" style="margin-bottom:.8rem">अपना जन्म विवरण यहां सहेजें — ज्योतिषी आपकी कुंडली बनाकर बेहतर परामर्श दे सकेंगे।</p>
-        <div class="fl"><label>नाम</label><input id="cmb-name" type="text" placeholder="आपका नाम"></div>
-        <div class="fl" style="margin-top:.6rem"><label>जन्म तिथि</label><input id="cmb-dob" type="date"></div>
-        <div class="fl" style="margin-top:.6rem"><label>जन्म समय</label><input id="cmb-tob" type="time"></div>
-        <div class="fl" style="margin-top:.6rem"><label>जन्म स्थान</label><input id="cmb-place" type="text" placeholder="शहर का नाम लिखें (e.g. Bhiwani, Delhi)" autocomplete="off"></div>
-        <div class="modal-err" id="cmb-err"></div>
-        <div class="modal-sub" id="cmb-saved-msg" style="color:#1B7A3D;display:none">&#x2713; जन्म विवरण सहेजा गया।</div>
-        <button class="btn bp" style="width:100%;margin-top:.7rem" onclick="custSaveBirthDetails()">सहेजें</button>
       </div>
 
       <div style="display:flex;justify-content:space-between;margin-top:.8rem;font-size:.82rem">
@@ -950,9 +957,45 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
             </div>
 
             <!-- Reply compose -->
-            <div class="chat-compose" style="margin-top:.6rem" id="am-compose-wrap">
-              <textarea id="am-reply" placeholder="उत्तर लिखें..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();astroSendReply();}"></textarea>
-              <button class="btn bp" style="flex:0 0 auto" onclick="astroSendReply()">&#x27A4; भेजें</button>
+            <div style="margin-top:.6rem" id="am-compose-wrap">
+              <!-- Reply tabs -->
+              <div style="display:flex;gap:.4rem;margin-bottom:.5rem">
+                <button onclick="showAstroReplyTab('text')" id="art-text" class="btn bp" style="flex:1;padding:.4rem;font-size:.8rem">✏️ उत्तर लिखें</button>
+                <button onclick="showAstroReplyTab('pdf')" id="art-pdf" class="btn bs2" style="flex:1;padding:.4rem;font-size:.8rem">📄 PDF भेजें</button>
+              </div>
+
+              <!-- Text reply -->
+              <div id="am-reply-text-pane">
+                <div class="chat-compose">
+                  <textarea id="am-reply" placeholder="उत्तर लिखें..." style="min-height:80px;resize:vertical"
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();astroSendReply();}"></textarea>
+                  <button class="btn bp" style="flex:0 0 auto;align-self:flex-end" onclick="astroSendReply()">&#x27A4; भेजें</button>
+                </div>
+              </div>
+
+              <!-- PDF upload pane -->
+              <div id="am-reply-pdf-pane" style="display:none">
+                <div class="pdf-upload-panel" onclick="document.getElementById('am-pdf-input').click()">
+                  <input type="file" id="am-pdf-input" accept=".pdf,application/pdf" onchange="astroHandlePdf(this)">
+                  <div style="font-size:2rem;margin-bottom:.4rem">📄</div>
+                  <div style="font-size:.85rem;font-weight:700;color:var(--mr)">PDF फ़ाइल चुनें</div>
+                  <div style="font-size:.75rem;color:var(--mt);margin-top:.2rem">Click करें या यहाँ drop करें</div>
+                </div>
+                <div id="am-pdf-preview" style="display:none" class="pdf-preview">
+                  <span>📄</span>
+                  <span id="am-pdf-name" style="flex:1;font-weight:600"></span>
+                  <span id="am-pdf-size" style="color:var(--mt)"></span>
+                  <button onclick="astroClearPdf()" style="background:none;border:none;cursor:pointer;color:#C0392B;font-size:1rem">✕</button>
+                </div>
+                <div style="margin-top:.5rem">
+                  <textarea id="am-pdf-note" placeholder="PDF के साथ संदेश लिखें (वैकल्पिक)..." rows="2"
+                    style="width:100%;padding:.5rem .7rem;border:1.5px solid var(--bd);border-radius:8px;font-family:'Mukta',sans-serif;font-size:.85rem;resize:vertical"></textarea>
+                </div>
+                <button class="btn bp" style="width:100%;margin-top:.5rem" onclick="astroSendPdf()">📄 PDF भेजें</button>
+                <p style="font-size:.72rem;color:var(--mt);margin-top:.4rem;text-align:center">
+                  ⚠️ PDF Firebase Storage में save होगी — Storage rules configure करें
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -3611,7 +3654,77 @@ function closeMobNav(){
 document.getElementById('mnav').addEventListener('click', function(e){
   if(e.target === this) closeMobNav();
 });
-function showTab(t) {
+function showAstroReplyTab(tab){
+  var textPane = document.getElementById('am-reply-text-pane');
+  var pdfPane  = document.getElementById('am-reply-pdf-pane');
+  if(textPane) textPane.style.display = (tab==='text') ? 'block' : 'none';
+  if(pdfPane)  pdfPane.style.display  = (tab==='pdf')  ? 'block' : 'none';
+
+  var btnText = document.getElementById('art-text');
+  var btnPdf  = document.getElementById('art-pdf');
+  if(btnText){
+    btnText.classList.remove('bp','bs2');
+    btnText.classList.add(tab==='text' ? 'bp' : 'bs2');
+    btnText.style.cssText = 'flex:1;padding:.4rem;font-size:.8rem';
+  }
+  if(btnPdf){
+    btnPdf.classList.remove('bp','bs2');
+    btnPdf.classList.add(tab==='pdf' ? 'bp' : 'bs2');
+    btnPdf.style.cssText = 'flex:1;padding:.4rem;font-size:.8rem';
+  }
+}
+
+var astroPdfFile = null;
+function astroHandlePdf(input){
+  var file = input.files[0];
+  if(!file) return;
+  if(file.type !== 'application/pdf' && !file.name.endsWith('.pdf')){
+    alert('कृपया केवल PDF फ़ाइल चुनें।'); input.value=''; return;
+  }
+  if(file.size > 10 * 1024 * 1024){
+    alert('PDF का आकार 10MB से कम होना चाहिए।'); input.value=''; return;
+  }
+  astroPdfFile = file;
+  document.getElementById('am-pdf-name').textContent = file.name;
+  document.getElementById('am-pdf-size').textContent = (file.size/1024).toFixed(0) + ' KB';
+  document.getElementById('am-pdf-preview').style.display = 'flex';
+}
+function astroClearPdf(){
+  astroPdfFile = null;
+  document.getElementById('am-pdf-input').value = '';
+  document.getElementById('am-pdf-preview').style.display = 'none';
+  document.getElementById('am-pdf-name').textContent = '';
+}
+function astroSendPdf(){
+  if(!astroActiveMobile){ alert('पहले किसी ग्राहक को चुनें।'); return; }
+  if(!astroPdfFile){ alert('कृपया पहले PDF फ़ाइल चुनें।'); return; }
+  var note = document.getElementById('am-pdf-note').value.trim();
+  // Check Firebase Storage is available
+  if(typeof firebase.storage === 'undefined'){
+    alert('Firebase Storage configure नहीं है।\nPDF link के बजाय message में note भेजें।'); return;
+  }
+  var path = 'pdfs/' + astroActiveMobile + '/' + Date.now() + '_' + astroPdfFile.name;
+  var btn = document.querySelector('#am-reply-pdf-pane .btn.bp');
+  if(btn){ btn.textContent = '⏳ Upload हो रही है...'; btn.disabled = true; }
+  firebase.storage().ref(path).put(astroPdfFile).then(function(snap){
+    return snap.ref.getDownloadURL();
+  }).then(function(url){
+    var msgText = (note ? note + '\n\n' : '') + '📄 PDF दस्तावेज़:\n' + astroPdfFile.name + '\n' + url;
+    return db.collection('conversations').doc(astroActiveMobile).set({
+      messages: firebase.firestore.FieldValue.arrayUnion({sender:'astro', text:msgText, ts:Date.now(), isPdf:true, pdfName:astroPdfFile.name, pdfUrl:url}),
+      lastUpdated: Date.now(), unreadByCustomer: true
+    }, {merge:true});
+  }).then(function(){
+    if(btn){ btn.textContent = '📄 PDF भेजें'; btn.disabled = false; }
+    document.getElementById('am-pdf-note').value = '';
+    astroClearPdf();
+    showAstroReplyTab('text');
+    alert('✅ PDF सफलतापूर्वक भेजी गई!');
+  }).catch(function(e){
+    if(btn){ btn.textContent = '📄 PDF भेजें'; btn.disabled = false; }
+    alert('PDF भेजने में त्रुटि: ' + e.message);
+  });
+}
   document.querySelectorAll('.tp').forEach(function(p)  { p.classList.remove('active'); });
   document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('active'); });
   var panel = document.getElementById('panel-' + t);
@@ -3709,12 +3822,23 @@ function showCmScreen(screen){
   if(screen==='inbox' && custSession){ attachCustListener(custSession); custLoadBirthDetails(); showCmInboxTab('chat'); }
 }
 function showCmInboxTab(tab){
-  document.getElementById('cm-pane-chat').style.display = (tab==='chat') ? 'block' : 'none';
-  document.getElementById('cm-pane-birth').style.display = (tab==='birth') ? 'block' : 'none';
-  document.getElementById('cmt-chat').classList.toggle('bp', tab==='chat');
-  document.getElementById('cmt-chat').classList.toggle('bs2', tab!=='chat');
-  document.getElementById('cmt-birth').classList.toggle('bp', tab==='birth');
-  document.getElementById('cmt-birth').classList.toggle('bs2', tab!=='birth');
+  // Show/hide panes
+  var chatPane  = document.getElementById('cm-pane-chat');
+  var birthPane = document.getElementById('cm-pane-birth');
+  if(chatPane)  chatPane.style.display  = (tab==='chat')  ? 'block' : 'none';
+  if(birthPane) birthPane.style.display = (tab==='birth') ? 'block' : 'none';
+
+  // Update tab button styles
+  var btnChat  = document.getElementById('cmt-chat');
+  var btnBirth = document.getElementById('cmt-birth');
+  if(btnChat){
+    btnChat.classList.remove('bp','bs2');
+    btnChat.classList.add(tab==='chat' ? 'bp' : 'bs2');
+  }
+  if(btnBirth){
+    btnBirth.classList.remove('bp','bs2');
+    btnBirth.classList.add(tab==='birth' ? 'bp' : 'bs2');
+  }
 }
 function custLoadBirthDetails(){
   if(!custSession || !fbReady) return;
@@ -3906,10 +4030,21 @@ function renderChatMsgs(elId, messages, myRole){
   var el = document.getElementById(elId);
   var html='';
   messages.forEach(function(m){
-    var mine = m.sender===myRole || (myRole==='astro' && m.sender==='astro') || (myRole==='customer' && m.sender==='customer');
-    html += '<div class="chat-bub '+(mine?'me':'them')+'">'+escHtml(m.text)+'<span class="ts">'+fmtTs(m.ts)+'</span></div>';
+    var mine = (myRole==='customer' && m.sender==='customer') || (myRole==='astro' && m.sender==='astro');
+    var content = '';
+    if(m.isPdf && m.pdfUrl){
+      content = (m.text.split('\n').slice(0,-1).join('\n') ? '<div style="margin-bottom:.3rem">' + escHtml(m.text.split('\n').slice(0,-1).join('\n')) + '</div>' : '') +
+        '<a href="' + escHtml(m.pdfUrl) + '" target="_blank" rel="noopener" ' +
+        'style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.2);' +
+        'border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:.35rem .7rem;' +
+        'color:inherit;text-decoration:none;font-size:.82rem;font-weight:700">' +
+        '📄 ' + escHtml(m.pdfName||'PDF दस्तावेज़') + '</a>';
+    } else {
+      content = escHtml(m.text);
+    }
+    html += '<div class="chat-bub '+(mine?'me':'them')+'">' + content + '<span class="ts">'+fmtTs(m.ts)+'</span></div>';
   });
-  el.innerHTML = html || '<div class="modal-sub" style="text-align:center;padding:1rem">&#x1F4AC; यहाँ अपना एक प्रश्न पूछें — ज्योतिषाचार्य K. Dheeraj व्यक्तिगत उत्तर देंगे।</div>';
+  el.innerHTML = html || '<div class="modal-sub" style="text-align:center;padding:1rem">&#x1F4AC; यहाँ अपना प्रश्न या कुंडली संबंधी जानकारी लिखें — ज्योतिषाचार्य K. Dheeraj व्यक्तिगत उत्तर देंगे।</div>';
   el.scrollTop = el.scrollHeight;
 }
 var ASTRO_WA = '917008310206'; // WhatsApp number with country code
