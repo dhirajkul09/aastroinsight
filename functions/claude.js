@@ -1,10 +1,31 @@
-export async function onRequestPost(context) {
+export async function onRequest(context) {
+  const request = context.request;
+  
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
+  }
+
+  // Only allow POST
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({error: 'Method not allowed'}), {
+      status: 405,
+      headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+    });
+  }
+
   try {
-    const body = await context.request.json();
+    const body = await request.json();
     const apiKey = context.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({error: 'API key not configured'}), {
+      return new Response(JSON.stringify({error: 'API key not set'}), {
         status: 500,
         headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
       });
@@ -27,7 +48,10 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
     return new Response(JSON.stringify(data), {
-      headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
 
   } catch(err) {
@@ -36,14 +60,4 @@ export async function onRequestPost(context) {
       headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
     });
   }
-}
-
-export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  });
 }
