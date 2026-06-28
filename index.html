@@ -318,6 +318,10 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
 .astro-quote cite{display:block;font-size:.75rem;color:var(--mt);font-style:normal;margin-top:.4rem;font-family:'Mukta',sans-serif}
 .expertise-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1rem}
 .chip{background:linear-gradient(135deg,var(--mr),#A0281E);color:#FFE8C0;border-radius:20px;padding:.28rem .75rem;font-size:.74rem;font-weight:600}
+.rashi-btn{background:#FFF8F0;border:1.5px solid var(--bd);border-radius:8px;padding:.6rem .4rem;font-size:.9rem;font-family:'Tiro Devanagari Hindi',serif;cursor:pointer;transition:all .18s;color:var(--tx);font-weight:600}
+.rashi-btn:hover,.rashi-btn.active{background:var(--mr);color:#FFE8C0;border-color:var(--mr)}
+.period-btn{background:#FFF8F0;border:1.5px solid var(--bd);border-radius:20px;padding:.35rem .9rem;font-size:.85rem;font-family:'Mukta',sans-serif;cursor:pointer;transition:all .18s;color:var(--tx)}
+.period-btn:hover,.period-btn.active{background:var(--sf);color:#fff;border-color:var(--sf);font-weight:700}
 </style>
 </head>
 <body>
@@ -328,12 +332,12 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
     </a>
     <nav id="mnav">
       <button class="mob-close-btn" onclick="closeMobNav()" aria-label="बंद करें">&#x2715;</button>
-      <a href="#" onclick="closeMobNav()" data-hi="&#x0915;&#x0941;&#x0902;&#x0921;&#x0932;&#x0940;" data-en="Kundli">🔯 &#x0915;&#x0941;&#x0902;&#x0921;&#x0932;&#x0940;</a>
-      <a href="#" onclick="closeMobNav()" data-hi="&#x0930;&#x093E;&#x0936;&#x093F;&#x092B;&#x0932;" data-en="Rashifal">♈ &#x0930;&#x093E;&#x0936;&#x093F;&#x092B;&#x0932;</a>
-      <a href="#" onclick="closeMobNav()" data-hi="&#x0935;&#x0930;&#x094D;&#x0937;&#x092B;&#x0932;" data-en="Varshfal">📅 &#x0935;&#x0930;&#x094D;&#x0937;&#x092B;&#x0932;</a>
+      <a href="#" onclick="scrollToKundli();closeMobNav();return false" data-hi="&#x0915;&#x0941;&#x0902;&#x0921;&#x0932;&#x0940;" data-en="Kundli">🔯 &#x0915;&#x0941;&#x0902;&#x0921;&#x0932;&#x0940;</a>
+      <a href="#" onclick="openRashifal();closeMobNav();return false" data-hi="&#x0930;&#x093E;&#x0936;&#x093F;&#x092B;&#x0932;" data-en="Rashifal">♈ &#x0930;&#x093E;&#x0936;&#x093F;&#x092B;&#x0932;</a>
+      <a href="#" onclick="doVarshfal();closeMobNav();return false" data-hi="&#x0935;&#x0930;&#x094D;&#x0937;&#x092B;&#x0932;" data-en="Varshfal">📅 &#x0935;&#x0930;&#x094D;&#x0937;&#x092B;&#x0932;</a>
       <a href="#" onclick="openMilan();closeMobNav();return false" data-hi="&#x092E;&#x093F;&#x0932;&#x093E;&#x0928;" data-en="Milan">💑 &#x092E;&#x093F;&#x0932;&#x093E;&#x0928;</a>
       <a href="#" onclick="openPanchang();closeMobNav();return false" data-hi="&#x092A;&#x0902;&#x091A;&#x093E;&#x0902;&#x0917;" data-en="Panchang">📿 &#x092A;&#x0902;&#x091A;&#x093E;&#x0902;&#x0917;</a>
-      <a href="mailto:aastroinsight@gmail.com" onclick="closeMobNav()" data-hi="&#x0938;&#x092E;&#x094D;&#x092A;&#x0930;&#x094D;&#x0915;" data-en="Contact">✉️ &#x0938;&#x092E;&#x094D;&#x092A;&#x0930;&#x094D;&#x0915;</a>
+      <a href="#" onclick="openSampark();closeMobNav();return false" data-hi="&#x0938;&#x092E;&#x094D;&#x092A;&#x0930;&#x094D;&#x0915;" data-en="Contact">✉️ &#x0938;&#x092E;&#x094D;&#x092A;&#x0930;&#x094D;&#x0915;</a>
       <a href="#" onclick="openAstroLogin();closeMobNav();return false" style="opacity:.85" data-hi="&#x1F511; &#x091C;&#x094D;&#x092F;&#x094B;&#x0924;&#x093F;&#x0937;&#x0940; &#x0932;&#x0949;&#x0917;&#x093F;&#x0928;" data-en="&#x1F511; Astrologer Login">🔑 &#x091C;&#x094D;&#x092F;&#x094B;&#x0924;&#x093F;&#x0937;&#x0940; &#x0932;&#x0949;&#x0917;&#x093F;&#x0928;</a>
       <a href="#" class="mob-nav-muft" onclick="openConsult();closeMobNav();return false">💬 मुफ्त परामर्श</a>
     </nav>
@@ -1100,7 +1104,70 @@ footer{background:linear-gradient(135deg,#7B1C2E,#A0281E);color:#FFE8C0;padding:
   </div>
 </div>
 
-<!-- Floating minimised badges — bottom-right corner -->
+<!-- ══ RASHIFAL MODAL ══ -->
+<div class="modal-ovl" id="rashifal-modal" onclick="if(event.target===this)closeRashifal()">
+  <div class="modal-box wide">
+    <button class="modal-close" onclick="closeRashifal()">✕</button>
+    <h3>♈ राशिफल — AI द्वारा</h3>
+    <p class="modal-sub">अपनी राशि चुनें — Claude AI आपके लिए विस्तृत फलादेश देगा</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-bottom:1rem">
+      <button class="rashi-btn" onclick="selectRashi(0,'मेष','♈')">♈ मेष</button>
+      <button class="rashi-btn" onclick="selectRashi(1,'वृष','♉')">♉ वृष</button>
+      <button class="rashi-btn" onclick="selectRashi(2,'मिथुन','♊')">♊ मिथुन</button>
+      <button class="rashi-btn" onclick="selectRashi(3,'कर्क','♋')">♋ कर्क</button>
+      <button class="rashi-btn" onclick="selectRashi(4,'सिंह','♌')">♌ सिंह</button>
+      <button class="rashi-btn" onclick="selectRashi(5,'कन्या','♍')">♍ कन्या</button>
+      <button class="rashi-btn" onclick="selectRashi(6,'तुला','♎')">♎ तुला</button>
+      <button class="rashi-btn" onclick="selectRashi(7,'वृश्चिक','♏')">♏ वृश्चिक</button>
+      <button class="rashi-btn" onclick="selectRashi(8,'धनु','♐')">♐ धनु</button>
+      <button class="rashi-btn" onclick="selectRashi(9,'मकर','♑')">♑ मकर</button>
+      <button class="rashi-btn" onclick="selectRashi(10,'कुम्भ','♒')">♒ कुम्भ</button>
+      <button class="rashi-btn" onclick="selectRashi(11,'मीन','♓')">♓ मीन</button>
+    </div>
+
+    <div id="rashifal-period" style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="period-btn active" onclick="setPeriod('aaj',this)">आज</button>
+      <button class="period-btn" onclick="setPeriod('saptah',this)">इस सप्ताह</button>
+      <button class="period-btn" onclick="setPeriod('maah',this)">इस माह</button>
+      <button class="period-btn" onclick="setPeriod('saal',this)">इस वर्ष</button>
+    </div>
+
+    <div id="rashifal-result" style="display:none">
+      <div class="cc" style="margin-bottom:.8rem">
+        <h3 id="rashifal-title">राशिफल</h3>
+        <div class="dots" id="rashifal-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="pt" id="rashifal-text" style="display:none;line-height:2;font-size:.95rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SAMPARK MODAL ══ -->
+<div class="modal-ovl" id="sampark-modal" onclick="if(event.target===this)closeSampark()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeSampark()">✕</button>
+    <h3>📞 सम्पर्क करें</h3>
+    <p class="modal-sub">ज्योतिषाचार्य K. Dheeraj से परामर्श के लिए WhatsApp पर संपर्क करें</p>
+
+    <div style="background:#FFF8F0;border-radius:10px;padding:1rem;margin-bottom:1rem;border:1px solid var(--bd)">
+      <div style="font-size:.9rem;color:var(--tx);margin-bottom:.5rem"><b>📱 WhatsApp:</b> +91-7008310206</div>
+      <div style="font-size:.9rem;color:var(--tx);margin-bottom:.5rem"><b>📧 Email:</b> aastroinsight@gmail.com</div>
+      <div style="font-size:.9rem;color:var(--tx)"><b>⏰ समय:</b> प्रातः 9 बजे — सायं 8 बजे</div>
+    </div>
+
+    <div class="fl"><label>आपका नाम *</label><input id="sp-name" type="text" placeholder="पूरा नाम लिखें"></div>
+    <div class="fl" style="margin-top:.7rem"><label>फ़ोन नंबर *</label><input id="sp-phone" type="tel" placeholder="+91 XXXXXXXXXX"></div>
+    <div class="fl" style="margin-top:.7rem"><label>प्रश्न / विषय</label>
+      <textarea id="sp-msg" rows="3" style="width:100%;padding:.6rem .8rem;border:1.5px solid var(--bd);border-radius:8px;font-family:'Mukta',sans-serif;font-size:.9rem;resize:vertical" placeholder="जन्म कुंडली, विवाह, करियर, स्वास्थ्य..."></textarea>
+    </div>
+    <div class="modal-err" id="sp-err"></div>
+    <button class="btn bp" style="width:100%;margin-top:1rem" onclick="sendWhatsApp()">
+      💬 WhatsApp पर भेजें
+    </button>
+    <p style="font-size:.75rem;color:var(--mt);text-align:center;margin-top:.5rem">WhatsApp खुलेगा — संदेश भेजें</p>
+  </div>
+</div>
 <div id="floating-badges" style="position:fixed;bottom:1.2rem;right:1.2rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
 
   <!-- Customer consultation badge -->
@@ -4830,6 +4897,86 @@ function _panchaModalRows(targetId, sunSid, moonSid, dow){
 
 function openMilan(){ document.getElementById('milan-modal').classList.add('show'); }
 function closeMilan(){ document.getElementById('milan-modal').classList.remove('show'); }
+
+// ── Scroll to Kundli form ──
+function scrollToKundli(){
+  var fc = document.querySelector('.fc-wrap') || document.querySelector('.fc');
+  if(fc) fc.scrollIntoView({behavior:'smooth'});
+}
+
+// ── Rashifal ──
+var _rashiSelected = -1, _periodSelected = 'aaj';
+
+function openRashifal(){
+  document.getElementById('rashifal-modal').classList.add('show');
+  document.getElementById('rashifal-result').style.display = 'none';
+}
+function closeRashifal(){ document.getElementById('rashifal-modal').classList.remove('show'); }
+
+function setPeriod(p, btn){
+  _periodSelected = p;
+  document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  if(_rashiSelected >= 0) fetchRashifal();
+}
+
+function selectRashi(idx, name, symbol){
+  _rashiSelected = idx;
+  document.querySelectorAll('.rashi-btn').forEach(function(b){ b.classList.remove('active'); });
+  event.target.classList.add('active');
+  fetchRashifal(name, symbol);
+}
+
+async function fetchRashifal(name, symbol){
+  var RNAMES = ['मेष','वृष','मिथुन','कर्क','सिंह','कन्या','तुला','वृश्चिक','धनु','मकर','कुम्भ','मीन'];
+  var RSYM = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  if(!name) name = RNAMES[_rashiSelected];
+  if(!symbol) symbol = RSYM[_rashiSelected];
+
+  var PERIOD_MAP = {aaj:'आज का', saptah:'इस सप्ताह का', maah:'इस माह का', saal:'इस वर्ष का'};
+  var periodText = PERIOD_MAP[_periodSelected] || 'आज का';
+
+  document.getElementById('rashifal-result').style.display = 'block';
+  document.getElementById('rashifal-title').textContent = symbol + ' ' + name + ' — ' + periodText + ' राशिफल';
+  document.getElementById('rashifal-dots').style.display = 'flex';
+  document.getElementById('rashifal-text').style.display = 'none';
+
+  var today = new Date().toLocaleDateString('hi-IN', {day:'numeric', month:'long', year:'numeric'});
+  var prompt = 'आप एक अनुभवी वैदिक ज्योतिषी हैं। आज की तारीख ' + today + ' है।\n\n' +
+    name + ' राशि के जातकों के लिए ' + periodText + ' राशिफल विस्तार से लिखें।\n\n' +
+    'निम्न बिंदुओं पर विस्तार से लिखें:\n' +
+    '1. समग्र फल\n2. स्वास्थ्य\n3. करियर व व्यापार\n4. प्रेम व परिवार\n5. धन व आर्थिक स्थिति\n6. शुभ रंग, अंक व दिन\n7. उपाय\n\n' +
+    'भाषा: सरल, प्रवाहमयी हिंदी। realistic aur balanced predictions den — kuch challenges bhi hon.';
+
+  var result = await callClaudeJSON(prompt, 'Aap ek anubhavi Vedic jyotishi hain. Hamesha shuddh Hindi mein vistar se uttar den.', 1500);
+
+  document.getElementById('rashifal-dots').style.display = 'none';
+  document.getElementById('rashifal-text').style.display = 'block';
+  document.getElementById('rashifal-text').innerHTML = result
+    ? result.replace(/\n/g,'<br>').replace(/(\d+\.\s)/g,'<b>$1</b>')
+    : 'राशिफल लोड करने में समस्या हुई — कृपया पुनः प्रयास करें।';
+}
+
+// ── Sampark / WhatsApp ──
+function openSampark(){ document.getElementById('sampark-modal').classList.add('show'); }
+function closeSampark(){ document.getElementById('sampark-modal').classList.remove('show'); }
+
+function sendWhatsApp(){
+  var name = document.getElementById('sp-name').value.trim();
+  var phone = document.getElementById('sp-phone').value.trim();
+  var msg = document.getElementById('sp-msg').value.trim();
+  var err = document.getElementById('sp-err');
+  err.textContent = '';
+  if(!name){ err.textContent = 'कृपया अपना नाम लिखें।'; return; }
+  if(!phone){ err.textContent = 'कृपया फ़ोन नंबर लिखें।'; return; }
+  var text = 'नमस्ते, मेरा नाम ' + name + ' है।' +
+    (phone ? ' मेरा नंबर: ' + phone + '.' : '') +
+    (msg ? ' विषय: ' + msg : '') +
+    ' AastroInsight से संपर्क कर रहा/रही हूं।';
+  // Replace XXXXXXXXXX with your actual WhatsApp number
+  var waNum = '917008310206'; // Dhiraj ji ka WhatsApp number
+  window.open('https://wa.me/' + waNum + '?text=' + encodeURIComponent(text), '_blank');
+}
 
 // ============================================================
 // BHAV FAL — house-wise predictions based on lord and occupants
